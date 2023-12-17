@@ -1,0 +1,23 @@
+# Ignorar arquivos de sistema do Mac
+.DS_Store
+
+# Ignorar arquivos de configuração do VS Code
+.vscode
+
+# Ignorar arquivos de build e binários do Go
+bin/
+pkg/
+
+# Ignorar arquivos gerados pelo protoc
+*.pb.go
+*.pb.gw.go
+
+# Ignorar arquivos de cache do Go
+go.sum
+go.mod
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos de certificados SSL
+ssl/*.pem

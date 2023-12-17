@@ -1,0 +1,55 @@
+version: "3.1"
+services:
+  partus_users:
+    container_name: partus_users
+    build:
+      context: ./Partus_users
+      dockerfile: Dockerfile
+    ports:
+      - 50051:50051
+    depends_on:
+      - mongo
+      - mongo-express
+    env_file:
+      - ./Partus_users/.env.development
+    networks:
+      - partus_users
+
+  mongo:
+    container_name: mongo_partus_users
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - partus_users:/data/db
+    env_file:
+      - ./Partus_users/.env.development
+    networks:
+      - partus_users
+
+  mongo-express:
+    container_name: mongo-express-partus_users
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongo
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+    volumes:
+      - partus_users:/data/db
+    env_file:
+      - ./Partus_users/.env.development
+    networks:
+      - partus_users
+
+networks:
+  partus_users:
+    driver: bridge
+
+volumes:
+  partus_users:
+    external: true
