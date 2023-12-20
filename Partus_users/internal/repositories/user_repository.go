@@ -11,7 +11,7 @@ import (
 )
 
 type IUserRepository interface {
-	CreateUser(ctx context.Context, personalInfo *api.PersonalInfo) (*api.User, error)
+	CreateUser(ctx context.Context, personalInfo *api.PersonalInfo, accountInfo *api.AccountInfo) (*api.User, error)
 	GetUser(ctx context.Context, id string) (*api.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*api.User, error)
 }
@@ -26,11 +26,12 @@ func NewUserRepository(dbService *config.DBService) IUserRepository {
 	}
 }
 
-func (r *UserRepository) CreateUser(ctx context.Context, personalInfo *api.PersonalInfo) (*api.User, error) {
+func (r *UserRepository) CreateUser(ctx context.Context, personalInfo *api.PersonalInfo, accountInfo *api.AccountInfo) (*api.User, error) {
 	collection := r.getCollection()
 
 	user := &api.User{
 		PersonalInfo: personalInfo,
+		AccountInfo:  accountInfo,
 	}
 
 	_, err := collection.InsertOne(ctx, user)
@@ -62,7 +63,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*api
 	collection := r.getCollection()
 
 	var user *api.User
-	filter := bson.M{"personalInfo.email": email}
+	filter := bson.M{"personalinfo.email": email}
 	err := collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

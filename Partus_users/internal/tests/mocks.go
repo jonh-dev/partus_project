@@ -11,15 +11,13 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) CreateUser(ctx context.Context, personalInfo *api.PersonalInfo) (*api.User, error) {
-	args := m.Called(ctx, personalInfo)
+func (m *MockUserRepository) CreateUser(ctx context.Context, personalInfo *api.PersonalInfo, accountInfo *api.AccountInfo) (*api.User, error) {
+	args := m.Called(ctx, personalInfo, accountInfo)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 
-	user := &api.User{
-		PersonalInfo: args.Get(0).(*api.PersonalInfo),
-	}
+	user := args.Get(0).(*api.User)
 	return user, args.Error(1)
 }
 

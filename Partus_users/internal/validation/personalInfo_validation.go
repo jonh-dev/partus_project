@@ -17,35 +17,28 @@ var (
 	ErrInvalidPhone     = errors.New("o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'")
 )
 
-func ValidateUser(user *api.User) error {
-	if !isValidFirstName(user.PersonalInfo.FirstName) {
+func ValidatePersonalInfo(personalInfo *api.PersonalInfo) error {
+	if !isValidFirstName(personalInfo.FirstName) {
 		return ErrInvalidFirstName
 	}
 
-	if !isValidLastName(user.PersonalInfo.LastName) {
+	if !isValidLastName(personalInfo.LastName) {
 		return ErrInvalidLastName
 	}
 
-	if !isValidEmail(user.PersonalInfo.Email) {
+	if !isValidEmail(personalInfo.Email) {
 		return ErrInvalidUserEmail
 	}
 
-	if !isValidBirthDate(user.PersonalInfo.BirthDate) {
+	if !isValidBirthDate(personalInfo.BirthDate) {
 		return ErrInvalidBirthDate
 	}
 
-	if err := isValidPhone(user.PersonalInfo.Phone); err != nil {
+	if err := isValidPhone(personalInfo.Phone); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func ValidateCreateUserRequest(req *api.CreateUserRequest) error {
-	user := &api.User{
-		PersonalInfo: req.PersonalInfo,
-	}
-	return ValidateUser(user)
 }
 
 func isValidFirstName(name string) bool {

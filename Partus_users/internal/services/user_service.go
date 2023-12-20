@@ -27,19 +27,30 @@ func NewUserService(repo repositories.IUserRepository) UserService {
 }
 
 func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest) (*api.UserResponse, error) {
-	err := validation.ValidateCreateUserRequest(req)
+	err := validation.ValidatePersonalInfo(req.PersonalInfo)
 	if err != nil {
 		log.Printf("Erro na validação do usuário: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "Erro na validação do usuário: %v", err)
 	}
 
-	existingUser, _ := s.repo.GetUserByEmail(ctx, req.PersonalInfo.Email)
+	err = validation.ValidateAccountInfo(req.AccountInfo)
+	if err != nil {
+		log.Printf("Erro na validação da conta: %v", err)
+		return nil, status.Errorf(codes.InvalidArgument, "Erro na validação do usuário: %v", err)
+	}
+
+	existingUser, err := s.repo.GetUserByEmail(ctx, req.PersonalInfo.Email)
+	if err != nil {
+		log.Printf("Erro ao buscar o usuário: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao buscar o usuário: %v", err)
+	}
+
 	if existingUser != nil {
 		log.Printf("E-mail já está em uso: %v", req.PersonalInfo.Email)
 		return nil, status.Errorf(codes.AlreadyExists, "E-mail já está em uso")
 	}
 
-	user, err := s.repo.CreateUser(ctx, req.PersonalInfo)
+	user, err := s.repo.CreateUser(ctx, req.PersonalInfo, req.AccountInfo)
 	if err != nil {
 		log.Printf("Erro ao criar o usuário: %v", err)
 		return nil, status.Errorf(codes.Internal, "Erro ao criar o usuário: %v", err)

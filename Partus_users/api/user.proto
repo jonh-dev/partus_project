@@ -6,11 +6,11 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/jonh-dev/partus_users/api";
 
-service UserService {
-  rpc CreateUser(CreateUserRequest) returns (UserResponse);
-  rpc GetUser(GetUserRequest) returns (UserResponse);
-  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
-  rpc DeleteUser(DeleteUserRequest) returns (UserResponse);
+enum AccountStatus {
+  ACTIVE = 0;
+  INACTIVE = 1;
+  PENDING = 2;
+  SUSPENDED = 3;
 }
 
 message PersonalInfo {
@@ -21,12 +21,36 @@ message PersonalInfo {
   string phone = 5;
 }
 
+message AccountInfo {
+  string username = 1;
+  string password = 2;
+  AccountStatus accountStatus = 3;
+  string statusReason = 4;
+  google.protobuf.Timestamp createdAt = 5;
+  google.protobuf.Timestamp updatedAt = 6;
+  google.protobuf.Timestamp lastLogin = 7;
+  int32 failedLoginAttempts = 8;
+  google.protobuf.Timestamp lastFailedLogin = 9;
+  string lastFailedLoginReason = 10;
+  google.protobuf.Timestamp accountLockedUntil = 11;
+  string accountLockedReason = 12;
+}
+
 message User {
   PersonalInfo personalInfo = 1;
+  AccountInfo accountInfo = 2;
+}
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (UserResponse);
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (UserResponse);
 }
 
 message CreateUserRequest {
   PersonalInfo personalInfo = 1;
+  AccountInfo accountInfo = 2;
 }
 
 message GetUserRequest {
