@@ -1,18 +1,19 @@
-package services
+package validations
 
 import (
 	"testing"
 	"time"
 
 	"github.com/jonh-dev/partus_users/api"
+	"github.com/jonh-dev/partus_users/internal/tests"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func TestUserValidation(t *testing.T) {
-	tests := []UserTest{
+func TestPersonalInfoValidation(t *testing.T) {
+	testsCases := []tests.UserTest{
 		{
-			name: "Invalid First Name - Lowercase",
-			request: &api.CreateUserRequest{
+			Name: "Invalid First Name - Lowercase",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "joão",
 					LastName:  "Silva",
@@ -22,7 +23,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -35,12 +36,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
 		},
 		{
-			name: "Invalid First Name - Multiple Words",
-			request: &api.CreateUserRequest{
+			Name: "Invalid First Name - Multiple Words",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João Carlos",
 					LastName:  "Silva",
@@ -50,7 +51,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -63,12 +64,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
 		},
 		{
-			name: "Invalid First Name - Contains Numbers",
-			request: &api.CreateUserRequest{
+			Name: "Invalid First Name - Contains Numbers",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João1",
 					LastName:  "Silva",
@@ -78,7 +79,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -91,12 +92,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
 		},
 		{
-			name: "Invalid First Name - Too Long",
-			request: &api.CreateUserRequest{
+			Name: "Invalid First Name - Too Long",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "Joãooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
 					LastName:  "Silva",
@@ -106,7 +107,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -119,12 +120,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres",
 		},
 		{
-			name: "Invalid Last Name - Lowercase",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Last Name - Lowercase",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "silva",
@@ -134,7 +135,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -147,12 +148,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
 		},
 		{
-			name: "Invalid Last Name - Contains Numbers",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Last Name - Contains Numbers",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva1",
@@ -162,7 +163,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -175,12 +176,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
 		},
 		{
-			name: "Invalid Last Name - Too Long",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Last Name - Too Long",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silvaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -190,7 +191,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -203,12 +204,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres",
 		},
 		{
-			name: "Invalid Email - Missing @",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Email - Missing @",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -218,7 +219,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -231,12 +232,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
 		},
 		{
-			name: "Invalid Email - Missing Domain",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Email - Missing Domain",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -246,7 +247,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -259,12 +260,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
 		},
 		{
-			name: "Invalid Email - Missing Username",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Email - Missing Username",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -274,7 +275,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -287,12 +288,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
 		},
 		{
-			name: "Invalid Email - Missing Username and Domain",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Email - Missing Username and Domain",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -302,7 +303,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -315,12 +316,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o e-mail deve ser um endereço de e-mail válido",
 		},
 		{
-			name: "Invalid Birth Date - Future Date",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Birth Date - Future Date",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -330,7 +331,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -343,12 +344,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual",
 		},
 		{
-			name: "Invalid Birth Date - User Too Young",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Birth Date - User Too Young",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -356,13 +357,27 @@ func TestUserValidation(t *testing.T) {
 					BirthDate: timestamppb.New(time.Now().AddDate(-12, 0, 0)),
 					Phone:     "(41) 99999-9999",
 				},
+				AccountInfo: &api.AccountInfo{
+					Username:              "joao.valid",
+					Password:              "ValidPassword123!",
+					AccountStatus:         api.AccountStatus_ACTIVE,
+					StatusReason:          "",
+					CreatedAt:             timestamppb.Now(),
+					UpdatedAt:             timestamppb.Now(),
+					LastLogin:             timestamppb.Now(),
+					FailedLoginAttempts:   0,
+					LastFailedLogin:       timestamppb.Now(),
+					LastFailedLoginReason: "",
+					AccountLockedUntil:    timestamppb.Now(),
+					AccountLockedReason:   "",
+				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual",
 		},
 		{
-			name: "Invalid Phone - Missing Area Code",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Phone - Missing Area Code",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -372,7 +387,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -385,12 +400,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
 		},
 		{
-			name: "Invalid Phone - Wrong Format",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Phone - Wrong Format",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -400,7 +415,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -413,12 +428,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
 		},
 		{
-			name: "Invalid Phone - Too Short - Brazilian Number",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Phone - Too Short - Brazilian Number",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Carlos",
@@ -428,7 +443,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -441,12 +456,12 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
 		},
 		{
-			name: "Invalid Phone - Too Long - Brazilian Number",
-			request: &api.CreateUserRequest{
+			Name: "Invalid Phone - Too Long - Brazilian Number",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Carlos",
@@ -456,7 +471,7 @@ func TestUserValidation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -469,98 +484,14 @@ func TestUserValidation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
-		},
-		{
-			name: "Invalid Username - Too Short",
-			request: &api.CreateUserRequest{
-				PersonalInfo: &api.PersonalInfo{
-					FirstName: "João",
-					LastName:  "Carlos",
-					Email:     "joao.username.to.short@example.com",
-					BirthDate: timestamppb.New(time.Date(2000, 8, 10, 0, 0, 0, 0, time.UTC)),
-					Phone:     "+5541999999999",
-				},
-				AccountInfo: &api.AccountInfo{
-					Username:              "jo",
-					Password:              "123456",
-					AccountStatus:         api.AccountStatus_ACTIVE,
-					StatusReason:          "",
-					CreatedAt:             timestamppb.Now(),
-					UpdatedAt:             timestamppb.Now(),
-					LastLogin:             timestamppb.Now(),
-					FailedLoginAttempts:   0,
-					LastFailedLogin:       timestamppb.Now(),
-					LastFailedLoginReason: "",
-					AccountLockedUntil:    timestamppb.Now(),
-					AccountLockedReason:   "",
-				},
-			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o nome de usuário deve começar e terminar com um caractere alfanumérico, pode conter letras, números, pontos, hifens e sublinhados, não pode conter caracteres especiais consecutivos, e deve ter entre 3 e 20 caracteres",
-		},
-		{
-			name: "Invalid Username - Too Long",
-			request: &api.CreateUserRequest{
-				PersonalInfo: &api.PersonalInfo{
-					FirstName: "João",
-					LastName:  "Carlos",
-					Email:     "joao.carlos.to.long@example.com",
-					BirthDate: timestamppb.New(time.Date(2000, 8, 10, 0, 0, 0, 0, time.UTC)),
-					Phone:     "+5541999999999",
-				},
-				AccountInfo: &api.AccountInfo{
-					Username:              "joaoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo",
-					Password:              "123456",
-					AccountStatus:         api.AccountStatus_ACTIVE,
-					StatusReason:          "",
-					CreatedAt:             timestamppb.Now(),
-					UpdatedAt:             timestamppb.Now(),
-					LastLogin:             timestamppb.Now(),
-					FailedLoginAttempts:   0,
-					LastFailedLogin:       timestamppb.Now(),
-					LastFailedLoginReason: "",
-					AccountLockedUntil:    timestamppb.Now(),
-					AccountLockedReason:   "",
-				},
-			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o nome de usuário deve começar e terminar com um caractere alfanumérico, pode conter letras, números, pontos, hifens e sublinhados, não pode conter caracteres especiais consecutivos, e deve ter entre 3 e 20 caracteres",
-		},
-		{
-			name: "Invalid Username - Special Characters",
-			request: &api.CreateUserRequest{
-				PersonalInfo: &api.PersonalInfo{
-					FirstName: "João",
-					LastName:  "Carlos",
-					Email:     "joao.carlos.special.char@example.com",
-					BirthDate: timestamppb.New(time.Date(2000, 8, 10, 0, 0, 0, 0, time.UTC)),
-					Phone:     "+5541999999999",
-				},
-				AccountInfo: &api.AccountInfo{
-					Username:              "joao.carlos.@#$%&*()_+",
-					Password:              "123456",
-					AccountStatus:         api.AccountStatus_ACTIVE,
-					StatusReason:          "",
-					CreatedAt:             timestamppb.Now(),
-					UpdatedAt:             timestamppb.Now(),
-					LastLogin:             timestamppb.Now(),
-					FailedLoginAttempts:   0,
-					LastFailedLogin:       timestamppb.Now(),
-					LastFailedLoginReason: "",
-					AccountLockedUntil:    timestamppb.Now(),
-					AccountLockedReason:   "",
-				},
-			},
-			wantErr:       true,
-			expectedError: "Erro na validação do usuário: o nome de usuário deve começar e terminar com um caractere alfanumérico, pode conter letras, números, pontos, hifens e sublinhados, não pode conter caracteres especiais consecutivos, e deve ter entre 3 e 20 caracteres",
+			WantErr:       true,
+			ExpectedError: "Erro na validação do usuário: o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'",
 		},
 
 		// Outros casos de teste para validação do usuário aqui
 	}
 
-	for _, tt := range tests {
+	for _, tt := range testsCases {
 		tt.RunTest(t)
 	}
 }

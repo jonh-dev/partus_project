@@ -37,8 +37,9 @@ message AccountInfo {
 }
 
 message User {
-  PersonalInfo personalInfo = 1;
-  AccountInfo accountInfo = 2;
+  string id = 1;
+  PersonalInfo personalInfo = 2;
+  AccountInfo accountInfo = 3;
 }
 
 service UserService {
@@ -46,6 +47,7 @@ service UserService {
   rpc GetUser(GetUserRequest) returns (UserResponse);
   rpc UpdateUser(UpdateUserRequest) returns (UserResponse);
   rpc DeleteUser(DeleteUserRequest) returns (UserResponse);
+  rpc HandleFailedLogin(HandleFailedLoginRequest) returns (UserResponse);
 }
 
 message CreateUserRequest {
@@ -63,6 +65,11 @@ message UpdateUserRequest {
 
 message DeleteUserRequest {
   string id = 1;
+}
+
+message HandleFailedLoginRequest {
+  string username = 1;
+  string reason = 2;
 }
 
 message UserResponse {

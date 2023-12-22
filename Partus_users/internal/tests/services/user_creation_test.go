@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/jonh-dev/partus_users/api"
+	"github.com/jonh-dev/partus_users/internal/tests"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestUserCreation(t *testing.T) {
-	tests := []UserTest{
+	testCases := []tests.UserTest{
 		{
-			name: "Valid User",
-			request: &api.CreateUserRequest{
+			Name: "Valid User",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Silva",
@@ -22,7 +23,7 @@ func TestUserCreation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -35,12 +36,12 @@ func TestUserCreation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       false,
-			expectedError: "",
+			WantErr:       false,
+			ExpectedError: "",
 		},
 		{
-			name: "Email Already Exists",
-			request: &api.CreateUserRequest{
+			Name: "Email Already Exists",
+			Request: &api.CreateUserRequest{
 				PersonalInfo: &api.PersonalInfo{
 					FirstName: "João",
 					LastName:  "Carlos",
@@ -49,7 +50,7 @@ func TestUserCreation(t *testing.T) {
 				},
 				AccountInfo: &api.AccountInfo{
 					Username:              "joao.valid",
-					Password:              "123456",
+					Password:              "ValidPassword123!",
 					AccountStatus:         api.AccountStatus_ACTIVE,
 					StatusReason:          "",
 					CreatedAt:             timestamppb.Now(),
@@ -62,13 +63,13 @@ func TestUserCreation(t *testing.T) {
 					AccountLockedReason:   "",
 				},
 			},
-			wantErr:       true,
-			expectedError: "E-mail já está em uso",
+			WantErr:       true,
+			ExpectedError: "E-mail já está em uso",
 		},
 		// Outros casos de teste para criação do usuário aqui
 	}
 
-	for _, tt := range tests {
+	for _, tt := range testCases {
 		tt.RunTest(t)
 	}
 }

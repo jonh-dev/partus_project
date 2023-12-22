@@ -1,4 +1,4 @@
-package services
+package tests
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/services"
-	"github.com/jonh-dev/partus_users/internal/tests"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -21,10 +20,10 @@ UserTest é uma struct que representa um teste de criação de usuário. Ela pos
   - expectedError: mensagem de erro esperada
 */
 type UserTest struct {
-	name          string
-	request       *api.CreateUserRequest
-	wantErr       bool
-	expectedError string
+	Name          string
+	Request       *api.CreateUserRequest
+	WantErr       bool
+	ExpectedError string
 }
 
 /*
@@ -34,10 +33,10 @@ RunTest é um método que executa um teste de criação de usuário. Ele recebe 
   - srv: serviço de usuários
 */
 func (ut *UserTest) RunTest(t *testing.T) {
-	mockRepo := new(tests.MockUserRepository)
+	mockRepo := new(MockUserRepository)
 	srv := services.NewUserService(mockRepo)
 
-	t.Run(ut.name, func(t *testing.T) {
+	t.Run(ut.Name, func(t *testing.T) {
 		setupMockRepository(mockRepo, ut)
 		runCreateUserTest(srv, ut, t)
 	})
@@ -49,7 +48,7 @@ setupMockRepository é um método que configura o mock do repositório de usuár
   - mockRepo: mock do repositório de usuários
   - ut: teste de criação de usuário
 */
-func setupMockRepository(mockRepo *tests.MockUserRepository, ut *UserTest) {
+func setupMockRepository(mockRepo *MockUserRepository, ut *UserTest) {
 	setupGetUserByEmailMock(mockRepo, ut)
 	setupCreateUserMock(mockRepo, ut)
 }
@@ -60,12 +59,12 @@ setupGetUserByEmailMock é um método que configura o mock do método GetUserByE
   - mockRepo: mock do repositório de usuários
   - ut: teste de criação de usuário
 */
-func setupGetUserByEmailMock(mockRepo *tests.MockUserRepository, ut *UserTest) {
-	if ut.name != "Email Already Exists" {
-		mockRepo.On("GetUserByEmail", mock.Anything, ut.request.PersonalInfo.Email).Return(nil, nil)
+func setupGetUserByEmailMock(mockRepo *MockUserRepository, ut *UserTest) {
+	if ut.Name != "Email Already Exists" {
+		mockRepo.On("GetUserByEmail", mock.Anything, ut.Request.PersonalInfo.Email).Return(nil, nil)
 		return
 	}
-	mockRepo.On("GetUserByEmail", mock.Anything, ut.request.PersonalInfo.Email).Return(&api.User{}, nil)
+	mockRepo.On("GetUserByEmail", mock.Anything, ut.Request.PersonalInfo.Email).Return(&api.User{}, nil)
 }
 
 /*
@@ -74,10 +73,10 @@ setupCreateUserMock é um método que configura o mock do método CreateUser do 
   - mockRepo: mock do repositório de usuários
   - ut: teste de criação de usuário
 */
-func setupCreateUserMock(mockRepo *tests.MockUserRepository, ut *UserTest) {
-	mockRepo.On("CreateUser", mock.Anything, ut.request.PersonalInfo, ut.request.AccountInfo).Return(&api.User{
-		PersonalInfo: ut.request.PersonalInfo,
-		AccountInfo:  ut.request.AccountInfo,
+func setupCreateUserMock(mockRepo *MockUserRepository, ut *UserTest) {
+	mockRepo.On("CreateUser", mock.Anything, ut.Request.PersonalInfo, ut.Request.AccountInfo).Return(&api.User{
+		PersonalInfo: ut.Request.PersonalInfo,
+		AccountInfo:  ut.Request.AccountInfo,
 	}, nil)
 }
 
@@ -89,11 +88,11 @@ runCreateUserTest é um método que executa o teste de criação de usuário. El
   - t: objeto de teste
 */
 func runCreateUserTest(srv services.UserService, ut *UserTest, t *testing.T) {
-	resp, err := srv.CreateUser(context.Background(), ut.request)
-	if !ut.wantErr {
+	resp, err := srv.CreateUser(context.Background(), ut.Request)
+	if !ut.WantErr {
 		assert.NoError(t, err)
-		assert.Equal(t, ut.request.PersonalInfo, resp.User.PersonalInfo)
-		assert.Equal(t, ut.request.AccountInfo, resp.User.AccountInfo)
+		assert.Equal(t, ut.Request.PersonalInfo, resp.User.PersonalInfo)
+		assert.Equal(t, ut.Request.AccountInfo, resp.User.AccountInfo)
 		return
 	}
 	assert.Error(t, err)
@@ -108,9 +107,9 @@ assertCorrectErrorMessage é um método que verifica se a mensagem de erro retor
   - ut: teste de criação de usuário
 */
 func assertCorrectErrorMessage(t *testing.T, err error, ut *UserTest) {
-	if ut.name != "Email Already Exists" {
-		assert.EqualError(t, err, fmt.Sprintf("rpc error: code = InvalidArgument desc = %s", ut.expectedError))
+	if ut.Name != "Email Already Exists" {
+		assert.EqualError(t, err, fmt.Sprintf("rpc error: code = InvalidArgument desc = %s", ut.ExpectedError))
 		return
 	}
-	assert.EqualError(t, err, fmt.Sprintf("rpc error: code = AlreadyExists desc = %s", ut.expectedError))
+	assert.EqualError(t, err, fmt.Sprintf("rpc error: code = AlreadyExists desc = %s", ut.ExpectedError))
 }
