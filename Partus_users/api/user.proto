@@ -69,8 +69,6 @@ service AccountInfoService {
 
 message CreateUserRequest {
   User user = 1;
-  PersonalInfo personal_info = 2;
-  AccountInfo account_info = 3;
 }
 
 message GetUserRequest {
