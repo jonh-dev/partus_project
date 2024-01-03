@@ -8,6 +8,7 @@ import (
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/converters"
 	"github.com/jonh-dev/partus_users/internal/repositories"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -74,12 +75,18 @@ func (s *userService) GetUser(ctx context.Context, req *api.GetUserRequest) (*ap
 	if err != nil {
 		return nil, fmt.Errorf("falha ao obter User: %w", err)
 	}
+
+	objectId, err := primitive.ObjectIDFromHex(req.Id)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter userId para ObjectID: %w", err)
+	}
+
 	apiPersonalInfo, err := s.personalInfoService.GetPersonalInfo(ctx, &api.GetPersonalInfoRequest{UserId: req.Id})
 	if err != nil {
 		return nil, fmt.Errorf("falha ao obter PersonalInfo: %w", err)
 	}
 
-	modelPersonalInfo, err := converters.ToModelPersonalInfo(req.Id, apiPersonalInfo)
+	modelPersonalInfo, err := converters.ToModelPersonalInfo(objectId, apiPersonalInfo)
 	if err != nil {
 		return nil, fmt.Errorf("falha ao converter PersonalInfo para o modelo: %w", err)
 	}
@@ -91,7 +98,7 @@ func (s *userService) GetUser(ctx context.Context, req *api.GetUserRequest) (*ap
 		return nil, fmt.Errorf("falha ao obter AccountInfo: %w", err)
 	}
 
-	modelAccountInfo, err := converters.ToModelAccountInfo(req.Id, apiAccountInfo)
+	modelAccountInfo, err := converters.ToModelAccountInfo(objectId, apiAccountInfo)
 	if err != nil {
 		return nil, fmt.Errorf("falha ao converter AccountInfo para o modelo: %w", err)
 	}
