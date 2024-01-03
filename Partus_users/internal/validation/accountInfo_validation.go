@@ -9,13 +9,6 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type OperationType int
-
-const (
-	Create OperationType = iota
-	Update
-)
-
 var (
 	ErrInvalidUsername             = errors.New("o nome de usuário deve começar e terminar com um caractere alfanumérico, pode conter letras, números, pontos, hifens e sublinhados, não pode conter caracteres especiais consecutivos, e deve ter entre 3 e 20 caracteres")
 	ErrInvalidPassword             = errors.New("a senha deve ter entre 8 e 64 caracteres, conter pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial")
