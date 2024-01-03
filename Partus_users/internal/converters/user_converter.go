@@ -14,17 +14,14 @@ func ToModelUser(user *api.User) (*model.User, error) {
 		return nil, errors.New("user não pode ser nil")
 	}
 
-	objectId, err := primitive.ObjectIDFromHex(user.Id)
-	if err != nil {
-		return nil, fmt.Errorf("falha ao converter userId para ObjectID: %w", err)
-	}
+	objectId := primitive.NewObjectID()
 
-	modelPersonalInfo, err := ToModelPersonalInfo(user.Id, user.PersonalInfo)
+	modelPersonalInfo, err := ToModelPersonalInfo(objectId, user.PersonalInfo)
 	if err != nil {
 		return nil, fmt.Errorf("falha ao converter PersonalInfo para o modelo: %w", err)
 	}
 
-	modelAccountInfo, err := ToModelAccountInfo(user.Id, user.AccountInfo)
+	modelAccountInfo, err := ToModelAccountInfo(objectId, user.AccountInfo)
 	if err != nil {
 		return nil, fmt.Errorf("falha ao converter AccountInfo para o modelo: %w", err)
 	}
