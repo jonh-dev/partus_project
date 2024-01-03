@@ -42,10 +42,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Falha ao criar o DBService: %v", err)
 	}
-	repo := repositories.NewUserRepository(dbService)
-	service := services.NewUserService(repo)
 
-	api.RegisterUserServiceServer(s, service.(api.UserServiceServer))
+	repo := repositories.NewUserRepository(dbService)
+	personalInfoRepo := repositories.NewPersonalInfoRepository(dbService)
+	accountInfoRepo := repositories.NewAccountInfoRepository(dbService)
+
+	personalInfoService := services.NewPersonalInfoService(personalInfoRepo)
+	accountInfoService := services.NewAccountInfoService(accountInfoRepo)
+	service := services.NewUserService(repo, personalInfoService, accountInfoService)
+
+	api.RegisterUserServiceServer(s, service)
 
 	log.Println("Acesso ao servidor na porta 8080...")
 	lis, err := net.Listen("tcp", ":8080")
