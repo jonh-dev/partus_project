@@ -14,32 +14,35 @@ enum AccountStatus {
 }
 
 message PersonalInfo {
-  string firstName = 1;
-  string lastName = 2;
-  string email = 3;
-  google.protobuf.Timestamp birthDate = 4;
-  string phone = 5;
+  string userId = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  google.protobuf.Timestamp birthDate = 5;
+  string phone = 6;
+  string profileImage = 7;
 }
 
 message AccountInfo {
-  string username = 1;
-  string password = 2;
-  AccountStatus accountStatus = 3;
-  string statusReason = 4;
-  google.protobuf.Timestamp createdAt = 5;
-  google.protobuf.Timestamp updatedAt = 6;
-  google.protobuf.Timestamp lastLogin = 7;
-  int32 failedLoginAttempts = 8;
-  google.protobuf.Timestamp lastFailedLogin = 9;
-  string lastFailedLoginReason = 10;
-  google.protobuf.Timestamp accountLockedUntil = 11;
-  string accountLockedReason = 12;
+  string userId = 1;
+  string username = 2;
+  string password = 3;
+  AccountStatus accountStatus = 4;
+  string statusReason = 5;
+  google.protobuf.Timestamp createdAt = 6;
+  google.protobuf.Timestamp updatedAt = 7;
+  google.protobuf.Timestamp lastLogin = 8;
+  int32 failedLoginAttempts = 9;
+  google.protobuf.Timestamp lastFailedLogin = 10;
+  string lastFailedLoginReason = 11;
+  google.protobuf.Timestamp accountLockedUntil = 12;
+  string accountLockedReason = 13;
 }
 
 message User {
   string id = 1;
-  PersonalInfo personalInfo = 2;
-  AccountInfo accountInfo = 3;
+  PersonalInfo personal_info = 2;
+  AccountInfo account_info = 3;
 }
 
 service UserService {
@@ -50,9 +53,24 @@ service UserService {
   rpc HandleFailedLogin(HandleFailedLoginRequest) returns (UserResponse);
 }
 
+service PersonalInfoService {
+  rpc CreatePersonalInfo(CreatePersonalInfoRequest) returns (PersonalInfoResponse);
+  rpc GetPersonalInfo(GetPersonalInfoRequest) returns (PersonalInfoResponse);
+  rpc UpdatePersonalInfo(UpdatePersonalInfoRequest) returns (PersonalInfoResponse);
+  rpc DeletePersonalInfo(DeletePersonalInfoRequest) returns (PersonalInfoResponse);
+}
+
+service AccountInfoService {
+  rpc CreateAccountInfo(CreateAccountInfoRequest) returns (AccountInfoResponse);
+  rpc GetAccountInfo(GetAccountInfoRequest) returns (AccountInfoResponse);
+  rpc UpdateAccountInfo(UpdateAccountInfoRequest) returns (AccountInfoResponse);
+  rpc DeleteAccountInfo(DeleteAccountInfoRequest) returns (AccountInfoResponse);
+}
+
 message CreateUserRequest {
-  PersonalInfo personalInfo = 1;
-  AccountInfo accountInfo = 2;
+  User user = 1;
+  PersonalInfo personal_info = 2;
+  AccountInfo account_info = 3;
 }
 
 message GetUserRequest {
@@ -74,5 +92,47 @@ message HandleFailedLoginRequest {
 
 message UserResponse {
   User user = 1;
+  string message = 2;
+}
+
+message CreatePersonalInfoRequest {
+  PersonalInfo personalInfo = 1;
+}
+
+message GetPersonalInfoRequest {
+  string userId = 1;
+}
+
+message UpdatePersonalInfoRequest {
+  PersonalInfo personalInfo = 1;
+}
+
+message DeletePersonalInfoRequest {
+  string userId = 1;
+}
+
+message PersonalInfoResponse {
+  PersonalInfo personalInfo = 1;
+  string message = 2;
+}
+
+message CreateAccountInfoRequest {
+  AccountInfo accountInfo = 1;
+}
+
+message GetAccountInfoRequest {
+  string userId = 1;
+}
+
+message UpdateAccountInfoRequest {
+  AccountInfo accountInfo = 1;
+}
+
+message DeleteAccountInfoRequest {
+  string userId = 1;
+}
+
+message AccountInfoResponse {
+  AccountInfo accountInfo = 1;
   string message = 2;
 }
