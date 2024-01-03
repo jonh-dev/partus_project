@@ -2,6 +2,7 @@ package validation
 
 import (
 	"errors"
+	"net/url"
 	"regexp"
 	"time"
 
@@ -10,14 +11,15 @@ import (
 )
 
 var (
-	ErrInvalidFirstName = errors.New("o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres")
-	ErrInvalidLastName  = errors.New("o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres")
-	ErrInvalidUserEmail = errors.New("o e-mail deve ser um endereço de e-mail válido")
-	ErrInvalidBirthDate = errors.New("a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual")
-	ErrInvalidPhone     = errors.New("o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'")
+	ErrInvalidFirstName    = errors.New("o primeiro nome deve começar com uma letra maiúscula, conter apenas uma palavra e ter no máximo 20 caracteres")
+	ErrInvalidLastName     = errors.New("o sobrenome deve começar com uma letra maiúscula em cada palavra e ter no máximo 50 caracteres")
+	ErrInvalidUserEmail    = errors.New("o e-mail deve ser um endereço de e-mail válido")
+	ErrInvalidBirthDate    = errors.New("a data de nascimento deve estar no passado, o usuário deve ter pelo menos 13 anos e o ano deve ser entre 1900 e o ano atual")
+	ErrInvalidPhone        = errors.New("o telefone ou celular deve estar no formato correto, ou seja, começar com '+' seguido de 1 a 3 dígitos para números internacionais, ou começar diretamente com um dígito para números brasileiros, e ter entre 9 e 14 dígitos no total, sem conter nenhum caractere que não seja dígito ou '+'")
+	ErrInvalidProfileImage = errors.New("a imagem do perfil deve ser um URL válido")
 )
 
-func ValidatePersonalInfo(personalInfo *api.PersonalInfo) error {
+func ValidatePersonalInfo(personalInfo *api.PersonalInfo, operation OperationType) error {
 	if !isValidFirstName(personalInfo.FirstName) {
 		return ErrInvalidFirstName
 	}
@@ -36,6 +38,12 @@ func ValidatePersonalInfo(personalInfo *api.PersonalInfo) error {
 
 	if err := isValidPhone(personalInfo.Phone); err != nil {
 		return err
+	}
+
+	if operation == UpdateProfile {
+		if !isValidProfileImage(personalInfo.ProfileImage) {
+			return ErrInvalidProfileImage
+		}
 	}
 
 	return nil
@@ -97,4 +105,9 @@ func isValidPhone(phone string) error {
 	}
 
 	return nil
+}
+
+func isValidProfileImage(profileImage string) bool {
+	_, err := url.ParseRequestURI(profileImage)
+	return err == nil
 }
