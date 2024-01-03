@@ -2,14 +2,14 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/jonh-dev/partus_users/api"
+	"github.com/jonh-dev/partus_users/internal/converters"
 	"github.com/jonh-dev/partus_users/internal/repositories"
-	"github.com/jonh-dev/partus_users/internal/validation"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserService interface {
@@ -21,96 +21,133 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repositories.IUserRepository
+	userRepo            repositories.IUserRepository
+	personalInfoService IPersonalInfoService
+	accountInfoService  IAccountInfoService
 }
 
-func NewUserService(repo repositories.IUserRepository) UserService {
-	return &userService{repo: repo}
+func NewUserService(userRepo repositories.IUserRepository, personalInfoService IPersonalInfoService, accountInfoService IAccountInfoService) *userService {
+	return &userService{
+		userRepo:            userRepo,
+		personalInfoService: personalInfoService,
+		accountInfoService:  accountInfoService,
+	}
 }
 
 func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest) (*api.UserResponse, error) {
-	err := validation.ValidatePersonalInfo(req.PersonalInfo)
+	modelUser, err := converters.ToModelUser(req.User)
 	if err != nil {
-		log.Printf("Erro na validação do usuário: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Erro na validação do usuário: %v", err)
+		log.Printf("Erro ao converter o usuário para o modelo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao converter o usuário para o modelo: %v", err)
 	}
 
-	err = validation.ValidateAccountInfo(req.AccountInfo, validation.Create, nil)
-	if err != nil {
-		log.Printf("Erro na validação da conta: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Erro na validação do usuário: %v", err)
-	}
-
-	existingUser, err := s.repo.GetUserByEmail(ctx, req.PersonalInfo.Email)
-	if err != nil {
-		log.Printf("Erro ao buscar o usuário: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao buscar o usuário: %v", err)
-	}
-
-	if existingUser != nil {
-		log.Printf("E-mail já está em uso: %v", req.PersonalInfo.Email)
-		return nil, status.Errorf(codes.AlreadyExists, "E-mail já está em uso")
-	}
-
-	now := timestamppb.Now()
-	req.AccountInfo.CreatedAt = now
-	req.AccountInfo.UpdatedAt = now
-
-	user, err := s.repo.CreateUser(ctx, req.PersonalInfo, req.AccountInfo)
+	user, err := s.userRepo.CreateUser(ctx, modelUser)
 	if err != nil {
 		log.Printf("Erro ao criar o usuário: %v", err)
 		return nil, status.Errorf(codes.Internal, "Erro ao criar o usuário: %v", err)
 	}
 
-	log.Printf("Usuário criado com sucesso: %v", user.PersonalInfo.Email)
-	return &api.UserResponse{User: user, Message: "Usuário criado com sucesso"}, nil
+	apiPersonalInfo := modelUser.PersonalInfo.ToProto()
+	_, err = s.personalInfoService.CreatePersonalInfo(ctx, apiPersonalInfo)
+	if err != nil {
+		log.Printf("Erro ao criar PersonalInfo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao criar PersonalInfo: %v", err)
+	}
+
+	apiAccountInfo := modelUser.AccountInfo.ToProto()
+	_, err = s.accountInfoService.CreateAccountInfo(ctx, apiAccountInfo)
+	if err != nil {
+		log.Printf("Erro ao criar AccountInfo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao criar AccountInfo: %v", err)
+	}
+
+	apiUser := user.ToProto()
+
+	return &api.UserResponse{
+		User:    apiUser,
+		Message: "Usuário criado com sucesso",
+	}, nil
 }
 
 func (s *userService) GetUser(ctx context.Context, req *api.GetUserRequest) (*api.UserResponse, error) {
-	user, err := s.repo.GetUser(ctx, req.Id)
+	modelUser, err := s.userRepo.GetUser(ctx, req.Id)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "Erro ao obter o usuário: %v", err)
+		return nil, fmt.Errorf("falha ao obter User: %w", err)
 	}
-	if user == nil {
-		return nil, status.Errorf(codes.NotFound, "Usuário não encontrado")
+	apiPersonalInfo, err := s.personalInfoService.GetPersonalInfo(ctx, &api.GetPersonalInfoRequest{UserId: req.Id})
+	if err != nil {
+		return nil, fmt.Errorf("falha ao obter PersonalInfo: %w", err)
 	}
 
-	return &api.UserResponse{User: user, Message: "Usuário obtido com sucesso"}, nil
+	modelPersonalInfo, err := converters.ToModelPersonalInfo(req.Id, apiPersonalInfo)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter PersonalInfo para o modelo: %w", err)
+	}
+
+	modelUser.PersonalInfo = *modelPersonalInfo
+
+	apiAccountInfo, err := s.accountInfoService.GetAccountInfo(ctx, &api.GetAccountInfoRequest{UserId: req.Id})
+	if err != nil {
+		return nil, fmt.Errorf("falha ao obter AccountInfo: %w", err)
+	}
+
+	modelAccountInfo, err := converters.ToModelAccountInfo(req.Id, apiAccountInfo)
+	if err != nil {
+		return nil, fmt.Errorf("falha ao converter AccountInfo para o modelo: %w", err)
+	}
+	modelUser.AccountInfo = *modelAccountInfo
+
+	apiUser := modelUser.ToProto()
+
+	return &api.UserResponse{
+		User:    apiUser,
+		Message: "Usuário obtido com sucesso",
+	}, nil
 }
 
 func (s *userService) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UserResponse, error) {
-	return &api.UserResponse{}, nil
-}
-
-func (s *userService) DeleteUser(ctx context.Context, req *api.DeleteUserRequest) (*api.UserResponse, error) {
-	return &api.UserResponse{}, nil
-}
-
-func (s *userService) HandleFailedLogin(ctx context.Context, req *api.HandleFailedLoginRequest) (*api.UserResponse, error) {
-	user, err := s.repo.GetUserByUsername(ctx, req.Username)
+	modelUser, err := converters.ToModelUser(req.User)
 	if err != nil {
-		log.Printf("Erro ao buscar o usuário: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao buscar o usuário: %v", err)
+		log.Printf("Erro ao converter o usuário para o modelo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao converter o usuário para o modelo: %v", err)
 	}
 
-	user.AccountInfo.FailedLoginAttempts++
-	user.AccountInfo.LastFailedLogin = timestamppb.Now()
-	user.AccountInfo.LastFailedLoginReason = req.Reason
-
-	err = validation.ValidateLoginFields(user.AccountInfo)
-	if err != nil {
-		log.Printf("Erro na validação da conta: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Erro na validação do usuário: %v", err)
-	}
-
-	updatedUser, err := s.repo.UpdateUser(ctx, user)
+	user, err := s.userRepo.UpdateUser(ctx, modelUser)
 	if err != nil {
 		log.Printf("Erro ao atualizar o usuário: %v", err)
 		return nil, status.Errorf(codes.Internal, "Erro ao atualizar o usuário: %v", err)
 	}
 
+	apiPersonalInfo := modelUser.PersonalInfo.ToProto()
+	_, err = s.personalInfoService.UpdatePersonalInfo(ctx, apiPersonalInfo)
+	if err != nil {
+		log.Printf("Erro ao atualizar PersonalInfo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao atualizar PersonalInfo: %v", err)
+	}
+
+	apiAccountInfo := modelUser.AccountInfo.ToProto()
+	_, err = s.accountInfoService.UpdateUserCredentials(ctx, apiAccountInfo)
+	if err != nil {
+		log.Printf("Erro ao atualizar AccountInfo: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao atualizar AccountInfo: %v", err)
+	}
+
+	apiUser := user.ToProto()
+
 	return &api.UserResponse{
-		User:    updatedUser,
-		Message: "Login falhou, usuário atualizado com sucesso",
+		User:    apiUser,
+		Message: "Usuário atualizado com sucesso",
 	}, nil
+}
+
+func (s *userService) DeleteUser(ctx context.Context, req *api.DeleteUserRequest) (*api.UserResponse, error) {
+	// Implemente a lógica de exclusão do usuário aqui
+	// ...
+	return nil, nil
+}
+
+func (s *userService) HandleFailedLogin(ctx context.Context, req *api.HandleFailedLoginRequest) (*api.UserResponse, error) {
+	// Implemente a lógica de manipulação de falha de login aqui
+	// ...
+	return nil, nil
 }
