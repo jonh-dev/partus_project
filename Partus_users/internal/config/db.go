@@ -2,6 +2,8 @@ package config
 
 import (
 	"context"
+	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -27,24 +29,43 @@ Função que cria um novo serviço de banco de dados.
 - Esta função é usada para criar um novo serviço de banco de dados. Ele retorna um erro, caso ocorra algum problema ao criar o serviço.
 */
 func NewDBService() (*DBService, error) {
-
 	envGetter := NewEnvVarGetter(&FileEnvLoader{})
 
-	uri, err := envGetter.Get("MONGO_URI")
-
+	inContainer, err := envGetter.Get("IN_CONTAINER")
 	if err != nil {
 		return nil, err
 	}
 
-	dbName, err := envGetter.Get("DB_NAME")
+	var uri string
+	if inContainer == "true" {
+		uri, err = envGetter.Get("DOCKER_MONGO_URI")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		uri, err = envGetter.Get("MONGO_URI")
+		if err != nil {
+			return nil, err
+		}
+	}
 
+	dbName, err := envGetter.Get("DB_NAME")
 	if err != nil {
 		return nil, err
 	}
 
 	clientOptions := options.Client().ApplyURI(uri)
 
-	client, err := connectToMongoDB(uri, clientOptions)
+	// Try to connect to MongoDB multiple times before giving up
+	var client *mongo.Client
+	for i := 0; i < 5; i++ {
+		client, err = mongo.Connect(context.Background(), clientOptions)
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to MongoDB, retrying in 5 seconds...")
+		time.Sleep(5 * time.Second)
+	}
 
 	if err != nil {
 		return nil, err
