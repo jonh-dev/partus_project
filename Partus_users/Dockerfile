@@ -1,5 +1,5 @@
 # Use a imagem oficial do Golang como base
-FROM golang:1.17
+FROM golang:1.20.6
 
 # Defina o diretório de trabalho no contêiner
 WORKDIR /app
@@ -15,10 +15,10 @@ RUN go mod download
 COPY . .
 
 # Construa o Go app
-# RUN go build -o main ./cmd/server
+RUN go build -o main ./cmd/server
 
-# Exponha a porta 8080 para o mundo fora deste contêiner
-# EXPOSE 8080
+# Exponha a porta 50051 para o mundo fora deste contêiner
+EXPOSE 50051
 
 # Execute o binário compilado
-# CMD ["./main"]
+CMD ["./main"]
