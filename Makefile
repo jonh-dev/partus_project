@@ -60,7 +60,7 @@ help: ## Show this help
 	@${HELP_CMD}
 
 up-partus_users: ## Start the partus_users service in development
-	docker-compose -f ../PARTUS_PROJECT/docker-compose.yml up partus_users
+	docker-compose -f ../PARTUS_PROJECT/docker-compose.yml up --build partus_users 
 
 down: ## Stop the service
 	docker-compose -f ../PARTUS_PROJECT/docker-compose.yml down
