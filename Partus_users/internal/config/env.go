@@ -75,6 +75,14 @@ func (e *EnvVarGetter) Get(key string) (string, error) {
 		return val, nil
 	}
 
+	inContainer := os.Getenv("IN_CONTAINER")
+	if inContainer == "true" {
+		val = os.Getenv(key + "_CONTAINER")
+		if val != "" {
+			return val, nil
+		}
+	}
+
 	env := e.getEnv()
 	absEnvPath, err := e.getAbsEnvPath(env)
 	if err != nil {
