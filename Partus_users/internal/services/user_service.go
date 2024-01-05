@@ -71,7 +71,7 @@ func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest
 
 	apiUser := user.ToProto()
 
-	logger.Success("Usuário criado com sucesso")
+	logger.Success(fmt.Sprintf("Usuário criado com sucesso: ID: %s, Nome: %s %s, Email: %s", apiUser.Id, apiUser.PersonalInfo.FirstName, apiUser.PersonalInfo.LastName, apiUser.PersonalInfo.Email))
 	return &api.UserResponse{
 		User:    apiUser,
 		Message: "Usuário criado com sucesso",
