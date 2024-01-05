@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/jonh-dev/go-error/errors"
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/repositories"
 	"github.com/jonh-dev/partus_users/internal/validation"
@@ -28,23 +29,21 @@ func NewPersonalInfoService(personalInfoRepo repositories.IPersonalInfoRepositor
 func (s *PersonalInfoService) CreatePersonalInfo(ctx context.Context, personalInfo *api.PersonalInfo) (*api.PersonalInfo, error) {
 	err := validation.ValidatePersonalInfo(personalInfo, validation.Create)
 	if err != nil {
-		log.Printf("Erro ao validar PersonalInfo: %v", err)
-		return nil, status.Errorf(codes.InvalidArgument, "Erro ao validar PersonalInfo: %v", err)
+		return nil, errors.New(codes.InvalidArgument, "Erro na validação das informações pessoais: "+err.Error())
 	}
 
 	emailExists, err := s.personalInfoRepo.DoesEmailExist(ctx, personalInfo.Email)
 	if err != nil {
-		log.Printf("Erro ao verificar a existência do e-mail: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao verificar a existência do e-mail: %v", err)
+		return nil, errors.New(codes.Internal, "Erro ao verificar a existência do e-mail: "+err.Error())
 	}
+
 	if emailExists {
-		return nil, status.Errorf(codes.AlreadyExists, "E-mail já existe")
+		return nil, errors.New(codes.AlreadyExists, "O e-mail já existe")
 	}
 
 	createdPersonalInfo, err := s.personalInfoRepo.CreatePersonalInfo(ctx, personalInfo)
 	if err != nil {
-		log.Printf("Erro ao criar PersonalInfo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao criar PersonalInfo: %v", err)
+		return nil, errors.New(codes.Internal, "Erro ao criar PersonalInfo: "+err.Error())
 	}
 
 	return createdPersonalInfo, nil
