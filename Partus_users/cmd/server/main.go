@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
 	"net"
+	"os"
 
+	"github.com/jonh-dev/go-logger/logger"
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/config"
 	"github.com/jonh-dev/partus_users/internal/repositories"
@@ -13,34 +14,38 @@ import (
 )
 
 func main() {
-	log.Println("Iniciando o servidor...")
+	logger.Info("Iniciando o servidor...")
 
 	envGetter := config.NewEnvVarGetter(&config.FileEnvLoader{})
 
 	certFile, err := envGetter.Get("SSL_CERT_FILE")
 
 	if err != nil {
-		log.Fatalf("Falha ao buscar o SSL_CERT_FILE: %v", err)
+		logger.Fatal("Falha ao buscar o SSL_CERT_FILE: " + err.Error())
 	}
 
 	keyFile, err := envGetter.Get("SSL_KEY_FILE")
 	if err != nil {
-		log.Fatalf("Falha ao buscar o SSL_KEY_FILE: %v", err)
+		logger.Fatal("Falha ao buscar o SSL_KEY_FILE: " + err.Error())
 	}
 
-	log.Println("Carregando certificados...")
+	if _, err := os.Stat(certFile); os.IsNotExist(err) {
+		logger.Fatal("Certificado não encontrado: " + err.Error())
+	}
+
+	logger.Info("Carregando certificados...")
 	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
 	if err != nil {
-		log.Fatalf("Falha ao setar o TLS: %v", err)
+		logger.Fatal("Falha ao setar o TLS: " + err.Error())
 	}
 
-	log.Println("Criando servidor...")
+	logger.Info("Criando servidor...")
 	s := grpc.NewServer(grpc.Creds(creds))
 
-	log.Println("Registrando serviços...")
+	logger.Info("Registrando serviços...")
 	dbService, err := config.NewDBService()
 	if err != nil {
-		log.Fatalf("Falha ao criar o DBService: %v", err)
+		logger.Fatal("Falha ao criar o DBService: " + err.Error())
 	}
 
 	repo := repositories.NewUserRepository(dbService)
@@ -53,13 +58,18 @@ func main() {
 
 	api.RegisterUserServiceServer(s, service)
 
-	log.Println("Acesso ao servidor na porta 8080...")
-	lis, err := net.Listen("tcp", ":8080")
+	port := os.Getenv("SERVER_PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	logger.Info("Acessando o servidor na porta " + port)
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		log.Fatalf("Falha ao escutar:  %v", err)
+		logger.Fatal("Failed to listen: " + err.Error())
 	}
 
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Falha ao inciar o servidor: %v", err)
+		logger.Fatal("Falha ao inciar o servidor: " + err.Error())
 	}
 }
