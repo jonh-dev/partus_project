@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jonh-dev/go-error/errors"
+	"github.com/jonh-dev/go-logger/logger"
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/converters"
 	"github.com/jonh-dev/partus_users/internal/repositories"
@@ -38,32 +40,38 @@ func NewUserService(userRepo repositories.IUserRepository, personalInfoService I
 func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest) (*api.UserResponse, error) {
 	modelUser, err := converters.ToModelUser(req.User)
 	if err != nil {
-		log.Printf("Erro ao converter o usuário para o modelo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao converter o usuário para o modelo: %v", err)
-	}
-
-	user, err := s.userRepo.CreateUser(ctx, modelUser)
-	if err != nil {
-		log.Printf("Erro ao criar o usuário: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao criar o usuário: %v", err)
+		logger.Error("Erro ao converter o usuário para o modelo: " + err.Error())
+		return nil, errors.New(codes.Internal, "Erro ao converter o usuário para o modelo: "+err.Error())
 	}
 
 	apiPersonalInfo := modelUser.PersonalInfo.ToProto()
 	_, err = s.personalInfoService.CreatePersonalInfo(ctx, apiPersonalInfo)
 	if err != nil {
-		log.Printf("Erro ao criar PersonalInfo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao criar PersonalInfo: %v", err)
+		if e, ok := err.(*errors.Error); ok {
+			logger.Error("Erro ao criar usuário: " + e.Error())
+			return nil, errors.New(e.GRPCStatus().Code(), "Erro ao criar usuário: "+e.Error())
+		}
+		logger.Error(err.Error())
+		return nil, err
+	}
+
+	user, err := s.userRepo.CreateUser(ctx, modelUser)
+	if err != nil {
+		return nil, errors.New(codes.Internal, "Erro ao criar o usuário: "+err.Error())
 	}
 
 	apiAccountInfo := modelUser.AccountInfo.ToProto()
 	_, err = s.accountInfoService.CreateAccountInfo(ctx, apiAccountInfo)
 	if err != nil {
-		log.Printf("Erro ao criar AccountInfo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao criar AccountInfo: %v", err)
+		if e, ok := err.(*errors.Error); ok {
+			return nil, e.GRPCStatus().Err()
+		}
+		return nil, errors.New(codes.Internal, "Erro desconhecido ao criar AccountInfo")
 	}
 
 	apiUser := user.ToProto()
 
+	logger.Success("Usuário criado com sucesso")
 	return &api.UserResponse{
 		User:    apiUser,
 		Message: "Usuário criado com sucesso",
