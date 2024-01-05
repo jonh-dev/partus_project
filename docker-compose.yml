@@ -1,4 +1,4 @@
-version: "3.1"
+version: "3.8"
 services:
   partus_users:
     container_name: partus_users
@@ -12,6 +12,11 @@ services:
       - mongo-express
     env_file:
       - ./Partus_users/.env.development
+    environment:
+      - IN_CONTAINER=true
+      - SSL_CERT_FILE=/app/ssl/cert.pem
+      - SSL_KEY_FILE=/app/ssl/key.pem
+      - SERVER_PORT=50051
     networks:
       - partus_users
 
