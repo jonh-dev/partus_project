@@ -13,104 +13,146 @@ func CreateValidPersonalInfo() *api.PersonalInfo {
 		FirstName:    "John",
 		LastName:     "Doe",
 		Email:        "john.doe@example.com",
-		BirthDate:    timestamppb.New(time.Now().AddDate(-20, 0, 0)), // Data de nascimento 20 anos atrás
-		Phone:        "+5511987654321",                               // Número de telefone brasileiro válido
-		ProfileImage: "https://example.com/profile.jpg",              // URL de imagem de perfil válido
+		BirthDate:    timestamppb.New(time.Now().AddDate(-20, 0, 0)),
+		Phone:        "+5511987654321",
+		ProfileImage: "https://example.com/profile.jpg",
 	}
 }
 
 func CreateFirstNameWithLowerCasePersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.FirstName = "john" // Primeiro nome começa com letra minúscula
+	personalInfo.FirstName = "john"
 	return personalInfo
 }
 
 func CreateFirstNameWithMoreThanOneWordPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.FirstName = "John Doe" // Primeiro nome contém mais de uma palavra
+	personalInfo.FirstName = "John Doe"
 	return personalInfo
 }
 
 func CreateFirstNameWithMoreThan20CharactersPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.FirstName = "Johndoedoejohndoedoejohndoe" // Primeiro nome contém mais de 20 caracteres
+	personalInfo.FirstName = "Johndoedoejohndoedoejohndoe"
 	return personalInfo
 }
 
 func CreateLastNameWithMoreThan50CharactersPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.LastName = "DoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe" // Sobrenome com mais de 50 caracteres
+	personalInfo.LastName = "DoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoeDoe"
 	return personalInfo
 }
 
 func CreateLastNameWithLowerCaseStartPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.LastName = "doe" // Sobrenome começa com letra minúscula
+	personalInfo.LastName = "doe"
 	return personalInfo
 }
 
 func CreateInvalidEmailPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Email = "invalid email" // Endereço de e-mail inválido
+	personalInfo.Email = "invalid email"
+	return personalInfo
+}
+
+func CreateEmailWithoutAtSymbolPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid.email.com"
+	return personalInfo
+}
+
+func CreateEmailWithoutDotPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid@com"
+	return personalInfo
+}
+
+func CreateEmailWithMultipleAtSymbolsPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid@@example.com"
+	return personalInfo
+}
+
+func CreateEmailWithSpecialCharactersPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid!@example.com"
+	return personalInfo
+}
+
+func CreateEmailWithSpacesPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid @example.com"
+	return personalInfo
+}
+
+func CreateEmailWithInvalidTLDPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalid@example.c"
+	return personalInfo
+}
+
+func CreateEmailWithMoreThan254CharactersPersonalInfo() *api.PersonalInfo {
+	personalInfo := CreateValidPersonalInfo()
+	personalInfo.Email = "invalidddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd@example.com"
 	return personalInfo
 }
 
 func CreateExistingEmailPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Email = "existing.email@example.com" // E-mail que já existe na base de dados
+	personalInfo.Email = "existing.email@example.com"
 	return personalInfo
 }
 
 func CreateFutureBirthDatePersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.BirthDate = timestamppb.New(time.Now().AddDate(1, 0, 0)) // Data de nascimento no futuro
+	personalInfo.BirthDate = timestamppb.New(time.Now().AddDate(1, 0, 0))
 	return personalInfo
 }
 
 func CreateBirthDateBefore1900PersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.BirthDate = timestamppb.New(time.Date(1899, time.January, 1, 0, 0, 0, 0, time.UTC)) // Data de nascimento antes de 1900
+	personalInfo.BirthDate = timestamppb.New(time.Date(1899, time.January, 1, 0, 0, 0, 0, time.UTC))
 	return personalInfo
 }
 
 func CreateBirthDateAfterCurrentYearPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.BirthDate = timestamppb.New(time.Date(time.Now().Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC)) // Data de nascimento após o ano atual
+	personalInfo.BirthDate = timestamppb.New(time.Date(time.Now().Year()+1, time.January, 1, 0, 0, 0, 0, time.UTC))
 	return personalInfo
 }
 
 func CreateUnderagePersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.BirthDate = timestamppb.New(time.Now().AddDate(-12, 0, 0)) // Usuário com menos de 13 anos
+	personalInfo.BirthDate = timestamppb.New(time.Now().AddDate(-12, 0, 0))
 	return personalInfo
 }
 
 func CreatePhoneWithInvalidAreaCodePersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Phone = "021234567890" // Número de telefone com código de área inválido
+	personalInfo.Phone = "021234567890"
 	return personalInfo
 }
 
 func CreatePhoneWithLessThanNineDigitsPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Phone = "55119876" // Número de telefone com menos de nove dígitos
+	personalInfo.Phone = "55119876"
 	return personalInfo
 }
 
 func CreatePhoneWithMoreThanFourteenDigitsPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Phone = "55119876543211234" // Número de telefone com mais de quatorze dígitos
+	personalInfo.Phone = "55119876543211234"
 	return personalInfo
 }
 
 func CreatePhoneWithInvalidCharactersPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.Phone = "55119876abc" // Número de telefone com caracteres inválidos
+	personalInfo.Phone = "55119876abc"
 	return personalInfo
 }
 
 func CreateInvalidUserIdPersonalInfo() *api.PersonalInfo {
 	personalInfo := CreateValidPersonalInfo()
-	personalInfo.UserId = "invalid_user_id" // UserId inválido
+	personalInfo.UserId = "invalid_user_id"
 	return personalInfo
 }
