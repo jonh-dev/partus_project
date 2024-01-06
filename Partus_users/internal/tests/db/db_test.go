@@ -12,7 +12,9 @@ import (
 )
 
 func TestDBConnection(t *testing.T) {
-	dbService, err := db.NewDBService()
+	envGetter := db.NewEnvVarGetter()
+
+	dbService, err := db.NewDBService(envGetter)
 
 	assert.NoError(t, err)
 	assert.NotNil(t, dbService)
