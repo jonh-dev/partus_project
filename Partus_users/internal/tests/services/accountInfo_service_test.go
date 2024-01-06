@@ -6,6 +6,7 @@ import (
 
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/services"
+	"github.com/jonh-dev/partus_users/internal/tests/mocks/encryption"
 	mocks "github.com/jonh-dev/partus_users/internal/tests/mocks/repositories"
 	"github.com/jonh-dev/partus_users/internal/tests/utils"
 	"github.com/jonh-dev/partus_users/internal/validation"
@@ -15,6 +16,9 @@ import (
 
 func TestAccountInfoService_CreateAccountInfo(t *testing.T) {
 	mockAccountInfoRepo := new(mocks.MockAccountInfoRepository)
+	mockPasswordEncryptor := new(encryption.MockPasswordEncryptor)
+
+	mockPasswordEncryptor.On("EncryptPassword", mock.AnythingOfType("string")).Return("encryptedPassword", nil)
 
 	testCases := []struct {
 		name          string
@@ -98,7 +102,7 @@ func TestAccountInfoService_CreateAccountInfo(t *testing.T) {
 		},
 	}
 
-	s := services.NewAccountInfoService(mockAccountInfoRepo)
+	s := services.NewAccountInfoService(mockAccountInfoRepo, mockPasswordEncryptor)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
