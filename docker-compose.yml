@@ -21,33 +21,36 @@ services:
       - partus_users
 
   mongo:
-    container_name: mongo_partus_users
     image: mongo
-    restart: always
+    container_name: mongo_partus_users
+    restart: unless-stopped
     ports:
       - 27017:27017
     volumes:
       - partus_users:/data/db
-    env_file:
-      - ./Partus_users/.env.development
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=partus_users_dev
     networks:
       - partus_users
 
   mongo-express:
-    container_name: mongo-express-partus_users
     image: mongo-express
-    restart: always
+    container_name: me_partus_users
+    restart: unless-stopped
     ports:
       - 8081:8081
     depends_on:
       - mongo
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_PORT: 27017
     volumes:
       - partus_users:/data/db
-    env_file:
-      - ./Partus_users/.env.development
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=root
+      - ME_CONFIG_MONGODB_URL=mongodb://root:root@mongo:27017/?authSource=admin
+      - ME_CONFIG_BASICAUTH_USERNAME=root
+      - ME_CONFIG_BASICAUTH_PASSWORD=root
     networks:
       - partus_users
 
