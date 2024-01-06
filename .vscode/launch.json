@@ -1,13 +1,21 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
         {
-            "name": "Go Run Debug",
+            "name": "Go Run Debug (Development)",
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceFolder}/Partus_users/cmd/server/main.go"
+            "program": "${workspaceFolder}/Partus_users/cmd/server/main.go",
+            "env": {"APP_ENV": "development"}
+        },
+        {
+            "name": "Go Run Debug (Production)",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/Partus_users/cmd/server/main.go",
+            "env": {"APP_ENV": "production"}
         }
     ]
 }
