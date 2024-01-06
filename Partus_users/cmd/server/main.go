@@ -7,6 +7,7 @@ import (
 	"github.com/jonh-dev/go-logger/logger"
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/config"
+	"github.com/jonh-dev/partus_users/internal/encryption"
 	"github.com/jonh-dev/partus_users/internal/repositories"
 	"github.com/jonh-dev/partus_users/internal/services"
 	"google.golang.org/grpc"
@@ -16,7 +17,7 @@ import (
 func main() {
 	logger.Info("Iniciando o servidor...")
 
-	envGetter := config.NewEnvVarGetter(&config.FileEnvLoader{})
+	envGetter := config.NewEnvVarGetter()
 
 	certFile, err := envGetter.Get("SSL_CERT_FILE")
 
@@ -43,17 +44,18 @@ func main() {
 	s := grpc.NewServer(grpc.Creds(creds))
 
 	logger.Info("Registrando serviços...")
-	dbService, err := config.NewDBService()
+	dbService, err := config.NewDBService(envGetter)
 	if err != nil {
 		logger.Fatal("Falha ao criar o DBService: " + err.Error())
 	}
 
+	passwordEncryptor := &encryption.BcryptPasswordEncryptor{}
 	repo := repositories.NewUserRepository(dbService)
 	personalInfoRepo := repositories.NewPersonalInfoRepository(dbService)
 	accountInfoRepo := repositories.NewAccountInfoRepository(dbService)
 
 	personalInfoService := services.NewPersonalInfoService(personalInfoRepo)
-	accountInfoService := services.NewAccountInfoService(accountInfoRepo)
+	accountInfoService := services.NewAccountInfoService(accountInfoRepo, passwordEncryptor)
 	service := services.NewUserService(repo, personalInfoService, accountInfoService)
 
 	api.RegisterUserServiceServer(s, service)
