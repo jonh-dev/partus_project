@@ -59,9 +59,44 @@ func TestPersonalInfoService_CreatePersonalInfo(t *testing.T) {
 			expectedError: validation.ErrInvalidUserEmail,
 		},
 		{
+			name:          "email without @ symbol",
+			personalInfo:  utils.CreateEmailWithoutAtSymbolPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email without . symbol",
+			personalInfo:  utils.CreateEmailWithoutDotPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email with multiple @ symbols",
+			personalInfo:  utils.CreateEmailWithMultipleAtSymbolsPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email with special characters",
+			personalInfo:  utils.CreateEmailWithSpecialCharactersPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email with spaces",
+			personalInfo:  utils.CreateEmailWithSpacesPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email with invalid TLD",
+			personalInfo:  utils.CreateEmailWithInvalidTLDPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
+			name:          "email with more than 254 characters",
+			personalInfo:  utils.CreateEmailWithMoreThan254CharactersPersonalInfo(),
+			expectedError: validation.ErrInvalidUserEmail,
+		},
+		{
 			name:          "existing email",
 			personalInfo:  utils.CreateExistingEmailPersonalInfo(),
-			expectedError: status.Errorf(codes.AlreadyExists, "E-mail já existe"),
+			expectedError: status.Errorf(codes.AlreadyExists, "O e-mail já existe"),
 		},
 		{
 			name:          "future birth date",
@@ -111,7 +146,7 @@ func TestPersonalInfoService_CreatePersonalInfo(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.name != "invalid email" {
+			if tc.expectedError != validation.ErrInvalidUserEmail {
 				if tc.name == "existing email" {
 					mockPersonalInfoRepo.On("DoesEmailExist", mock.Anything, tc.personalInfo.Email).Return(true, nil)
 				} else {
@@ -125,7 +160,7 @@ func TestPersonalInfoService_CreatePersonalInfo(t *testing.T) {
 
 			if tc.expectedError != nil {
 				assert.Error(t, err)
-				assert.Contains(t, err.Error(), tc.expectedError.Error())
+				assert.Contains(t, status.Convert(err).Message(), status.Convert(tc.expectedError).Message())
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, personalInfo)
