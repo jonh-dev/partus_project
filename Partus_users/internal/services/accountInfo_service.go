@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jonh-dev/partus_users/api"
+	"github.com/jonh-dev/partus_users/internal/encryption"
 	"github.com/jonh-dev/partus_users/internal/repositories"
 	"github.com/jonh-dev/partus_users/internal/validation"
 	"google.golang.org/grpc/codes"
@@ -18,11 +19,12 @@ type IAccountInfoService interface {
 }
 
 type AccountInfoService struct {
-	accountInfoRepo repositories.IAccountInfoRepository
+	accountInfoRepo   repositories.IAccountInfoRepository
+	passwordEncryptor encryption.PasswordEncryptor
 }
 
-func NewAccountInfoService(accountInfoRepo repositories.IAccountInfoRepository) *AccountInfoService {
-	return &AccountInfoService{accountInfoRepo: accountInfoRepo}
+func NewAccountInfoService(accountInfoRepo repositories.IAccountInfoRepository, passwordEncryptor encryption.PasswordEncryptor) *AccountInfoService {
+	return &AccountInfoService{accountInfoRepo: accountInfoRepo, passwordEncryptor: passwordEncryptor}
 }
 
 func (s *AccountInfoService) CreateAccountInfo(ctx context.Context, accountInfo *api.AccountInfo) (*api.AccountInfo, error) {
@@ -31,6 +33,13 @@ func (s *AccountInfoService) CreateAccountInfo(ctx context.Context, accountInfo 
 		log.Printf("Erro ao validar AccountInfo: %v", err)
 		return nil, status.Errorf(codes.InvalidArgument, "Erro ao validar AccountInfo: %v", err)
 	}
+
+	encryptedPassword, err := s.passwordEncryptor.EncryptPassword(accountInfo.Password)
+	if err != nil {
+		log.Printf("Erro ao criptografar a senha: %v", err)
+		return nil, status.Errorf(codes.Internal, "Erro ao criptografar a senha: %v", err)
+	}
+	accountInfo.Password = encryptedPassword
 
 	createdAccountInfo, err := s.accountInfoRepo.CreateAccountInfo(ctx, accountInfo)
 	if err != nil {
