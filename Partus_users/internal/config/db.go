@@ -9,31 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-/*
-Estrutura de dados que representa o serviço de banco de dados.
-
-- Client: Cliente do MongoDB.
-
-- DBName: Nome do banco de dados.
-*/
 type DBService struct {
 	Client *mongo.Client
 	DBName string
 }
 
-/*
-Função que cria um novo serviço de banco de dados.
-
-@returns *DBService, error
-
-- Esta função é usada para criar um novo serviço de banco de dados. Ele retorna um erro, caso ocorra algum problema ao criar o serviço.
-*/
-func NewDBService() (*DBService, error) {
-	envGetter := NewEnvVarGetter(&FileEnvLoader{})
+func NewDBService(envGetter *EnvVarGetter) (*DBService, error) {
 
 	inContainer, err := envGetter.Get("IN_CONTAINER")
 	if err != nil {
-		return nil, err
+		inContainer = "false"
 	}
 
 	var uri string
@@ -56,8 +41,17 @@ func NewDBService() (*DBService, error) {
 
 	clientOptions := options.Client().ApplyURI(uri)
 
-	// Try to connect to MongoDB multiple times before giving up
+	client, err := connectToMongoDB(uri, clientOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DBService{Client: client, DBName: dbName}, nil
+}
+
+func connectToMongoDB(uri string, clientOptions *options.ClientOptions) (*mongo.Client, error) {
 	var client *mongo.Client
+	var err error
 	for i := 0; i < 5; i++ {
 		client, err = mongo.Connect(context.Background(), clientOptions)
 		if err == nil {
@@ -66,25 +60,5 @@ func NewDBService() (*DBService, error) {
 		log.Printf("Failed to connect to MongoDB, retrying in 5 seconds...")
 		time.Sleep(5 * time.Second)
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &DBService{Client: client, DBName: dbName}, nil
-}
-
-/*
-Função que conecta ao MongoDB.
-
-@params uri string
-
-@params clientOptions *options.ClientOptions
-
-@returns *mongo.Client, error
-
-- Esta função é usada para conectar ao MongoDB. Ela usa a string de conexão para se conectar ao MongoDB. Ela retorna um erro, caso ocorra algum problema ao se conectar ao MongoDB.
-*/
-func connectToMongoDB(uri string, clientOptions *options.ClientOptions) (*mongo.Client, error) {
-	return mongo.Connect(context.Background(), clientOptions)
+	return client, err
 }
