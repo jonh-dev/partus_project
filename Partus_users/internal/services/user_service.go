@@ -10,6 +10,7 @@ import (
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/converters"
 	"github.com/jonh-dev/partus_users/internal/repositories"
+	"github.com/jonh-dev/partus_users/internal/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -55,11 +56,6 @@ func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest
 		return nil, err
 	}
 
-	user, err := s.userRepo.CreateUser(ctx, modelUser)
-	if err != nil {
-		return nil, errors.New(codes.Internal, "Erro ao criar o usuário: "+err.Error())
-	}
-
 	apiAccountInfo := modelUser.AccountInfo.ToProto()
 	_, err = s.accountInfoService.CreateAccountInfo(ctx, apiAccountInfo)
 	if err != nil {
@@ -67,6 +63,14 @@ func (s *userService) CreateUser(ctx context.Context, req *api.CreateUserRequest
 			return nil, e.GRPCStatus().Err()
 		}
 		return nil, errors.New(codes.Internal, "Erro desconhecido ao criar AccountInfo")
+	}
+
+	modelUser.AccountInfo.Password = apiAccountInfo.Password
+	modelUser.AccountInfo.CreatedAt = apiAccountInfo.CreatedAt.AsTime()
+
+	user, err := s.userRepo.CreateUser(ctx, modelUser)
+	if err != nil {
+		return nil, errors.New(codes.Internal, "Erro ao criar o usuário: "+err.Error())
 	}
 
 	apiUser := user.ToProto()
@@ -111,6 +115,8 @@ func (s *userService) GetUser(ctx context.Context, req *api.GetUserRequest) (*ap
 		return nil, fmt.Errorf("falha ao converter AccountInfo para o modelo: %w", err)
 	}
 	modelUser.AccountInfo = *modelAccountInfo
+
+	modelUser.AccountInfo.CreatedAt = utils.ReadjustToSaoPaulo(modelUser.AccountInfo.CreatedAt)
 
 	apiUser := modelUser.ToProto()
 
