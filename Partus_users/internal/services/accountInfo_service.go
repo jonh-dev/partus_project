@@ -7,6 +7,7 @@ import (
 	"github.com/jonh-dev/partus_users/api"
 	"github.com/jonh-dev/partus_users/internal/encryption"
 	"github.com/jonh-dev/partus_users/internal/repositories"
+	"github.com/jonh-dev/partus_users/internal/utils"
 	"github.com/jonh-dev/partus_users/internal/validation"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,6 +41,8 @@ func (s *AccountInfoService) CreateAccountInfo(ctx context.Context, accountInfo 
 		return nil, status.Errorf(codes.Internal, "Erro ao criptografar a senha: %v", err)
 	}
 	accountInfo.Password = encryptedPassword
+	now := utils.GetCurrentTimestamp()
+	accountInfo.CreatedAt = utils.AdjustToSaoPaulo(now)
 
 	createdAccountInfo, err := s.accountInfoRepo.CreateAccountInfo(ctx, accountInfo)
 	if err != nil {
