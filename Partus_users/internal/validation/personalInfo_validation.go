@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/jonh-dev/partus_users/api"
+	"github.com/jonh-dev/partus_users/internal/utils"
 )
 
 var (
@@ -103,9 +104,8 @@ func isValidPhone(phone string) error {
 		return ErrInvalidPhone
 	}
 
-	// Verifica se o número tem o código de área
 	areaCode := re.FindStringSubmatch(phone)[2]
-	if areaCode == "" {
+	if areaCode == "" || !utils.IsValidAreaCode(areaCode) {
 		return ErrInvalidPhone
 	}
 
