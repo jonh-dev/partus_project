@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/jonh-dev/go-error/errors"
 	"github.com/jonh-dev/go-logger/logger"
@@ -13,13 +12,11 @@ import (
 	"github.com/jonh-dev/partus_users/internal/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type UserService interface {
 	CreateUser(ctx context.Context, req *api.CreateUserRequest) (*api.UserResponse, error)
 	GetUser(ctx context.Context, req *api.GetUserRequest) (*api.UserResponse, error)
-	UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UserResponse, error)
 	DeleteUser(ctx context.Context, req *api.DeleteUserRequest) (*api.UserResponse, error)
 	HandleFailedLogin(ctx context.Context, req *api.HandleFailedLoginRequest) (*api.UserResponse, error)
 }
@@ -123,41 +120,6 @@ func (s *userService) GetUser(ctx context.Context, req *api.GetUserRequest) (*ap
 	return &api.UserResponse{
 		User:    apiUser,
 		Message: "Usuário obtido com sucesso",
-	}, nil
-}
-
-func (s *userService) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UserResponse, error) {
-	modelUser, err := converters.ToModelUser(req.User)
-	if err != nil {
-		log.Printf("Erro ao converter o usuário para o modelo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao converter o usuário para o modelo: %v", err)
-	}
-
-	user, err := s.userRepo.UpdateUser(ctx, modelUser)
-	if err != nil {
-		log.Printf("Erro ao atualizar o usuário: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao atualizar o usuário: %v", err)
-	}
-
-	apiPersonalInfo := modelUser.PersonalInfo.ToProto()
-	_, err = s.personalInfoService.UpdatePersonalInfo(ctx, apiPersonalInfo)
-	if err != nil {
-		log.Printf("Erro ao atualizar PersonalInfo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao atualizar PersonalInfo: %v", err)
-	}
-
-	apiAccountInfo := modelUser.AccountInfo.ToProto()
-	_, err = s.accountInfoService.UpdateUserCredentials(ctx, apiAccountInfo)
-	if err != nil {
-		log.Printf("Erro ao atualizar AccountInfo: %v", err)
-		return nil, status.Errorf(codes.Internal, "Erro ao atualizar AccountInfo: %v", err)
-	}
-
-	apiUser := user.ToProto()
-
-	return &api.UserResponse{
-		User:    apiUser,
-		Message: "Usuário atualizado com sucesso",
 	}, nil
 }
 
