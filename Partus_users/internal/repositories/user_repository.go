@@ -14,7 +14,6 @@ import (
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *model.User) (*model.User, error)
 	GetUser(ctx context.Context, id string) (*model.User, error)
-	UpdateUser(ctx context.Context, user *model.User) (*model.User, error)
 }
 
 type UserRepository struct {
@@ -57,23 +56,4 @@ func (r *UserRepository) GetUser(ctx context.Context, id string) (*model.User, e
 
 func (r *UserRepository) getCollection() *mongo.Collection {
 	return r.dbService.Client.Database(r.dbService.DBName).Collection("users")
-}
-
-func (r *UserRepository) UpdateUser(ctx context.Context, user *model.User) (*model.User, error) {
-	collection := r.getCollection()
-
-	filter := bson.M{"_id": user.Id}
-	update := bson.M{
-		"$set": bson.M{
-			"personalInfo": user.PersonalInfo,
-			"accountInfo":  user.AccountInfo,
-		},
-	}
-
-	_, err := collection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return nil, fmt.Errorf("falha ao atualizar usuário no banco de dados: %w", err)
-	}
-
-	return user, nil
 }
