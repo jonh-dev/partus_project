@@ -21,27 +21,29 @@ var (
 )
 
 func ValidatePersonalInfo(personalInfo *api.PersonalInfo, operation OperationType) error {
-	if !isValidFirstName(personalInfo.FirstName) {
+	if personalInfo.FirstName != "" && !isValidFirstName(personalInfo.FirstName) {
 		return ErrInvalidFirstName
 	}
 
-	if !isValidLastName(personalInfo.LastName) {
+	if personalInfo.LastName != "" && !isValidLastName(personalInfo.LastName) {
 		return ErrInvalidLastName
 	}
 
-	if !isValidEmail(personalInfo.Email) {
+	if personalInfo.Email != "" && !isValidEmail(personalInfo.Email) {
 		return ErrInvalidUserEmail
 	}
 
-	if !isValidBirthDate(personalInfo.BirthDate) {
+	if personalInfo.BirthDate != nil && !isValidBirthDate(personalInfo.BirthDate) {
 		return ErrInvalidBirthDate
 	}
 
-	if err := isValidPhone(personalInfo.Phone); err != nil {
-		return err
+	if personalInfo.Phone != "" {
+		if err := isValidPhone(personalInfo.Phone); err != nil {
+			return err
+		}
 	}
 
-	if operation == UpdateProfile {
+	if operation == UpdateProfile && personalInfo.ProfileImage != "" {
 		if !isValidProfileImage(personalInfo.ProfileImage) {
 			return ErrInvalidProfileImage
 		}
